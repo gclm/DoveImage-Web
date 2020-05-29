@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DoveImage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="assets/images/icon.png">
+    <link rel="stylesheet" type="text/css" href="assets/lib/webuploader/css/webuploader.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/lib/webuploader/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/lib/iview/styles/iview.css">
+    <link rel="stylesheet" type="text/css" href="assets/lib/layui/css/layui.css">
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-header">
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-bg-blue">
+        <li class="layui-nav-item layui-this"><a href="index.html">首页</a></li>
+        <li class="layui-nav-item"><a href="about.html">关于</a></li>
+    </ul>
+<!--    <ul class="layui-nav layui-layout-right layui-bg-blue">-->
+<!--        <li class="layui-nav-item">-->
+<!--            <a href="">控制台</a>-->
+<!--        </li>-->
+<!--        <li class="layui-nav-item">-->
+<!--            <a href=""><img src="//t.cn/RCzsdCq" class="layui-nav-img">我</a>-->
+<!--            <dl class="layui-nav-child">-->
+<!--                <dd><a href="javascript:">修改信息</a></dd>-->
+<!--                <dd><a href="javascript:">安全管理</a></dd>-->
+<!--                <dd><a href="javascript:">退出系统</a></dd>-->
+<!--            </dl>-->
+<!--        </li>-->
+<!--    </ul>-->
+</div>
+<div id="wrapper" v-cloak>
+    <img src="">
+    <div id="container">
+        <!--头部，相册选择和格式选择-->
+        <div id="uploader">
+            <div class="queueList">
+                <div id="dndArea" class="placeholder">
+                    <div id="filePicker"></div>
+                    <p>或将照片拖到这里，单次最多可选5张</p>
+                </div>
+            </div>
+            <div class="statusBar" style="display:none;">
+                <div class="progress">
+                    <span class="text">0%</span>
+                    <span class="percentage"></span>
+                </div>
+                <div class="info"></div>
+                <div class="btns">
+                    <div id="filePicker2"></div>
+                    <div class="uploadBtn">开始上传</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template v-show="flag" style="margin-top:20px;">
+        <tabs @on-click="tab($event)">
+            <tab-pane icon="ios-link" v-for="item in images" label="图片地址"></tab-pane>
+        </tabs>
+    </template>
+    <div style="margin-top:20px;" v-show="flag">
+        <i-form :label-width="120">
+            <Form-item label="URL：" style="width:60%">
+                <i-input v-model="image.URL" id="URL" style="width: 500px"></i-input>
+                <i-button data-clipboard-target="#URL" class="btn" @click="copy('URL')" type="primary">复制</i-button>
+                <i-button class="btn" @click="preview()" type="primary">访问</i-button>
+            </Form-item>
+            <Form-item label="HTML：" style="width:60%">
+                <i-input v-model="image.HTML" id="HTML" style="width: 500px"></i-input>
+                <i-button data-clipboard-target="#HTML" class="btn" @click="copy('HTML')" type="primary">复制</i-button>
+            </Form-item>
+            <Form-item label="Markdown：" style="width:60%">
+                <i-input v-model="image.Markdown" id="Markdown" style="width: 500px"></i-input>
+                <i-button data-clipboard-target="#Markdown" class="btn" @click="copy('Markdown')" type="primary">复制
+                </i-button>
+            </Form-item>
+            <Form-item label="BBCode:" style="width:60%">
+                <i-input v-model="image.BBCode" id="MinIo" style="width: 500px"></i-input>
+                <i-button data-clipboard-target="#BBCode" class="btn" @click="copy('BBCode')" type="primary">复制</i-button>
+            </Form-item>
+        </i-form>
+    </div>
+</div>
+<script type="text/javascript" src="assets/js/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="assets/lib/vue/vue.min.js"></script>
+<script type="text/javascript" src="assets/lib/iview/iview.min.js"></script>
+<script type="text/javascript" src="assets/lib/webuploader/js/webuploader.min.js"></script>
+<script type="text/javascript" src="assets/js/upload.js"></script>
+<script type="text/javascript" src="assets/lib/clipboard/clipboard.min.js"></script>
+<script>
+    new ClipboardJS('.btn');
+    var vm = new Vue({
+        el: '#wrapper',
+        data: {
+            flag: false,
+            images: [],
+            image: {
+                URL: '',
+                BBCode: '',
+                HTML: '',
+                Markdown: ''
+            },
+            index: 0,
+        },
+        methods: {
+            copy: function (type) {
+                this.$Notice.success({
+                    title: '复制成功',
+                    desc: '小伙伴，赶紧尝试一下吧'
+                });
+            },
+            showUrl: function (response) {
+                // console.log("result2" + JSON.stringify(response));
+                if (response.code == 200) {
+                    let url = response.data.url;
+                    let image = {};
+                    image.URL = url;
+                    image.BBCode = "[img]" + url + "[/img]";
+                    image.HTML = "<img src = \"" + url + "\" />";
+                    image.Markdown = "!['" + response.data.name + "'](" + url + ")";
+                    vm.images.push(image);
+                    if (vm.image.URL == "") {
+                        vm.tab(0);
+                    }
+                    vm.flag = true;
+                } else {
+                    this.$Notice.warning({
+                        title: '警告！！！',
+                        desc: response.message
+                    });
+                }
+            },
+            preview: function () {
+                top.window.open(vm.images[vm.index].URL);
+            },
+            tab: function (item) {
+                vm.index = item;
+                vm.image.URL = vm.images[item].URL;
+                vm.image.HTML = vm.images[item].HTML;
+                vm.image.BBCode = vm.images[item].BBCode;
+                vm.image.Markdown = vm.images[item].Markdown;
+            }
+        },
+        created: function () {
+
+        }
+    });
+</script>
+</body>
+</html>
