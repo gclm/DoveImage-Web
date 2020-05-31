@@ -118,7 +118,7 @@
             },
             showUrl: function (response) {
                 // console.log("result2" + JSON.stringify(response));
-                if (response.code == 200) {
+                if (response.code == 0) {
                     let url = response.data.url;
                     let image = {};
                     image.URL = url;
