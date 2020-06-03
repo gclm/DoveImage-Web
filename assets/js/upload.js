@@ -151,7 +151,7 @@
             swf: '../../dist/Uploader.swf',
             chunked: false,
             chunkSize: 512 * 1024,
-            server: 'api/v1/image',
+            server: 'https://image.coderlab.cn/api/v1/image',
             // runtimeOrder: 'flash',
 
             accept: {
