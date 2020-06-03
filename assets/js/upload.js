@@ -151,7 +151,7 @@
             swf: '../../dist/Uploader.swf',
             chunked: false,
             chunkSize: 512 * 1024,
-            server: 'http://127.0.0.1:8080/api/v1/image',
+            server: 'api/v1/image',
             // runtimeOrder: 'flash',
 
             accept: {
